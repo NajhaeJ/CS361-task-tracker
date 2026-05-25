@@ -45,19 +45,40 @@ def view_tasks():
 
 
 def delete_tasks():
-    """ This fucntion displays a users current task list. 
+    """ This function displays a users current task list. 
     If the list is empty function will inform user that it cannot be empty.
     Otherwise function allows user to select task number and delete. 
-    Will ask user to confirm descion."""
+    Will ask user to confirm decision."""
 
     view_tasks()
 
     if len(tasks) == 0:
         return
 
+    try:
+        task_number = int(input("Enter task number to delete: "))
+        task_index = task_number - 1
+
+        if task_index < 0 or task_index >= len(tasks):
+            print("Invalid task number.")
+            return
+
+        confirm = input("Are you sure you would like to delete this task? Type yes to confirm: ")
+
+        if confirm.lower() == "yes":
+            tasks.pop(task_index)
+            print("Task successfully deleted.")
+        else:
+            print("Action cancelled.")
+
+    except ValueError:
+        print("Please enter a valid number.")
+        
 def mark_complete():
+    """ This function marks user selected tasks as complete."""
     view_tasks()
 
+    #Stops action if task list is empty.
     if len(tasks) == 0:
         return
 
@@ -68,9 +89,9 @@ def mark_complete():
         if task_index < 0 or task_index >= len(tasks):
             print("Invalid task number.")
             return
-
+        # Asks user for confirmation before fully deleting a task.
         confirm = input("Are you sure? Type yes to confirm: ")
-
+        
         if confirm.lower() == "yes":
             tasks[task_index]["complete"] = True
             print("Task marked complete.")
