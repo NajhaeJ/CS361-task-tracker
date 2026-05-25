@@ -1,5 +1,6 @@
 tasks = []
-
+completed_tasks = []
+deleted_tasks = []
 
 def show_menu():
     """ Creates a Task Tracker menu, displaying the user 
@@ -36,6 +37,7 @@ def add_task():
 def view_tasks():
     if len(tasks) == 0:
         print("No tasks yet.")
+        input("Press Enter to return...")
         return
 
     print("\nYour Tasks:")
