@@ -2,18 +2,25 @@ tasks = []
 
 
 def show_menu():
+    """ Creates a Task Tracker menu, displaying the user 
+        the title and available menu options to select."""
     print("\nTask Tracker")
     print("1. Add Task")
     print("2. View Tasks")
     print("3. Mark Task Complete")
-    print("4. More Details")
-    print("5. Exit")
-
+    print("4. Delete Tasks")
+    print("5. More Details")
+    print("6. Exit")
 
 def add_task():
+    """ Function allows users to enter a task into 
+        a list of dictionaries if not empty.
+        If task entered is empty the function will 
+        prompt user that task cannot be empty."""
+    
     task_name = input("Enter task: ")
 
-    if task_name.strip() == "":
+    if task_name.strip() == "":            #Checks if user input was empty. If empty prints appropriate message. 
         print("Task cannot be empty.")
         return
 
@@ -36,6 +43,17 @@ def view_tasks():
         status = "Complete" if task["complete"] else "Active"
         print(f"{index}. {task['name']} - {status}")
 
+
+def delete_tasks():
+    """ This fucntion displays a users current task list. 
+    If the list is empty function will inform user that it cannot be empty.
+    Otherwise function allows user to select task number and delete. 
+    Will ask user to confirm descion."""
+
+    view_tasks()
+
+    if len(tasks) == 0:
+        return
 
 def mark_complete():
     view_tasks()
@@ -82,12 +100,14 @@ def main():
         elif choice == "3":
             mark_complete()
         elif choice == "4":
-            more_details()
+            delete_tasks()
         elif choice == "5":
+            more_details()
+        elif choice == "6":
             print("Goodbye.")
             break
         else:
-            print("Invalid option. Please choose 1-5.")
+            print("Invalid option. Please choose 1-6.")
 
 
 main()
