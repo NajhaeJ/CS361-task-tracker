@@ -6,6 +6,16 @@ completed_tasks = []
 deleted_tasks = []
 
 #------------------------------------------------------
+# Global constants
+#------------------------------------------------------
+
+priority_rank = {
+    "High": 1,
+    "Medium": 2,
+    "Low": 3
+}
+
+#------------------------------------------------------
 # Menu Display Helper Functions
 #------------------------------------------------------
 
@@ -99,9 +109,8 @@ def view_deleted_tasks():
         print(f"{index}. {task['name']} - {status}")
 
 def view_all_tasks():
-    if len(tasks) == 0:             #Checks current task list. If list is empty prints "No tasks yet".
-        print("No tasks yet.")
-        return
+    if len(tasks) == 0:             #Checks current task list. If list is empty prints "No active tasks yet".
+        print("No active tasks yet.")
     # -----------------------------------------------
     # Display active tasks
     # ----------------------------------------------
@@ -126,6 +135,7 @@ def view_all_tasks():
     # Display deleted tasks
     # ----------------------------------------------
     print("\nYour Deleted Tasks:")
+
     if len(deleted_tasks) == 0:             #Checks current task list. If list is empty prints "No tasks yet".
         print("No deleted tasks yet.")
 
@@ -150,11 +160,19 @@ def add_task():
     if task_name.strip() == "":  # Checks if user input was empty. If empty prints appropriate message.
         print("Task cannot be empty.")
         return
+
     if task_due_date.strip() == "":
         print("Task due date cannot be empty.")
         return
+    if len(task_due_date) != 10 or task_due_date[4] != "-" or task_due_date[7] != "-":
+        print("Task due date must be in YYYY-MM-DD format.")
+        return
+
     if task_priority.strip() == "":
         print("Task priority cannot be empty.")
+        return
+    if task_priority not in ["High", "Medium", "Low"]:
+        print("Priority must be one of 'High', 'Medium' or 'Low'.")
         return
 
     # Creates a task dictionary to be stored in the tasks list.
@@ -257,9 +275,15 @@ def edit_task():
             show_edit_tasks_menu()  #Prints edit task menu using helper function
 
             menu_option = input("Enter menu number to select: ")
+
             if menu_option == "1": #Ask user for new task name, overrides old task name.
                 new_name = input("Enter new task name: ")
-                selected_task["name"] = new_name
+
+                if new_name.strip() == "":  # Checks if user input was empty. If empty prints appropriate message.
+                    print("Task cannot be empty.")
+                    return
+                else:
+                    selected_task["name"] = new_name
 
             elif menu_option == "2": #Ask user for new task description, overrides old description.
                 new_description = input("Enter new task description: ")
@@ -267,10 +291,27 @@ def edit_task():
 
             elif menu_option == "3": #Ask user for new due date, overrides old due date.
                 new_due_date = input("Enter new task due date: ")
-                selected_task["due date"] = new_due_date
+
+                #Validate that new due date is not empty
+                if new_due_date.strip() == "":
+                    print("Task due date cannot be empty.")
+                    return
+                if len(new_due_date) != 10 or new_due_date[4] != "-" or new_due_date[7] != "-":
+                    print("Task due date must be in YYYY-MM-DD format.")
+                    return
+                else:
+                    selected_task["due date"] = new_due_date
 
             elif menu_option == "4": #Ask user for new priority rating, overrides old priority.
                 new_priority = input("Enter new task priority: ")
+
+                #Validates that new priority input is not empty and uses correct ranking.
+                if new_priority.strip() == "":
+                    print("Task priority cannot be empty.")
+                    return
+                if new_priority not in ["High", "Medium", "Low"]:
+                    print("Priority must be one of 'High', 'Medium' or 'Low'.")
+                    return
                 selected_task["priority"] = new_priority
 
             elif menu_option == "5": #Brings user back to main menu.
@@ -297,10 +338,11 @@ def sort_tasks():
                 print("No tasks yet to sort.")
                 input("Press Enter to return to the main menu.")
                 return
-
-
-
-
+            else:
+                #If tasks list is not empty, sort tasks list by the dictionary "name" value.
+                tasks.sort(key=lambda x: x["name"])
+                print("\nTasks sorted successfully!")
+                view_active_tasks()
 
         elif sort_option == 2:
             #Sort Z-A
@@ -308,22 +350,41 @@ def sort_tasks():
                 print("No tasks yet to sort.")
                 input("Press Enter to return to the main menu.")
                 return
+
+            else:
+                #If tasks list list is not empty. Sort by names in reverse order.
+                tasks.sort(key=lambda x: x["name"], reverse=True)
+                print("\nTasks sorted successfully!")
+                view_active_tasks()
+
         elif sort_option == 3:
             #Sort Due Date
             if len(tasks) == 0:
                 print("No tasks yet to sort.")
                 input("Press Enter to return to the main menu.")
                 return
+            else:
+                #Sorts by due date if tasks list is not empty
+                tasks.sort(key=lambda x: x["due date"])
+                print("\nTasks sorted successfully!")
+                view_active_tasks()
+
         elif sort_option == 4:
-            #Sort Priority
+            #Sort by Priority
 
             #Checks if tasks list is empty
             if len(tasks) == 0:
                 print("No tasks yet to sort.")
                 input("Press Enter to return to the main menu.")
                 return
+            else:
+                #sorts by priority
+                tasks.sort(key=lambda x: priority_rank[x["priority"]])
+                print("\nTasks sorted successfully!")
+                view_active_tasks()
 
         elif sort_option == 5:
+            "Returns to main menu"
             return
 
         else:
@@ -337,6 +398,8 @@ def more_details():
     print("This app lets users add tasks, view tasks, mark tasks as complete, delete tasks, edit tasks, and sort tasks.")
     print("Users can avoid extra information by staying on the main menu.")
     print("Users can gather more information by choosing this More Details option.")
+    input("Press Enter to return to the main menu.")
+    return
 #------------------------------------------------------
 # Menu Controller Functions
 #------------------------------------------------------
