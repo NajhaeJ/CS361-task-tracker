@@ -249,6 +249,7 @@ def delete_tasks():
         else:
             print("Action cancelled.")
 
+
     except ValueError:
         print("Please enter a valid number.")
 
