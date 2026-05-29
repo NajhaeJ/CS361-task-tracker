@@ -1,5 +1,5 @@
 #------------------------------------------------------
-# Imports.
+# Imports
 #------------------------------------------------------
 
 import json
@@ -495,6 +495,22 @@ def receive_data_from_storage_service():
         print("Storage service unavailable. Loading from local JSON.")
         return None
 
+
+#------------------------------------------------------
+# Task Reminder Functions
+#------------------------------------------------------
+
+def send_task_to_reminder_service(selected_task):
+    reminder_url = "http://127.0.0.1:5001/generate_reminder"
+
+
+    payload = {
+        "task_name": selected_task["name"],
+        "due_date": selected_task["due date"],
+        "completed": selected_task["complete"],
+    }
+    response = requests.post(reminder_url, json=payload)
+    return response.json()
 #------------------------------------------------------
 # Menu Controller Functions
 #------------------------------------------------------
