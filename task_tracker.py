@@ -501,6 +501,7 @@ def receive_data_from_storage_service():
 #------------------------------------------------------
 
 def send_task_to_reminder_service(selected_task):
+    """ """
     reminder_url = "http://127.0.0.1:5001/generate_reminder"
 
 
