@@ -1,6 +1,15 @@
 #------------------------------------------------------
+# Imports
+#------------------------------------------------------
+
+import json
+import requests
+
+
+#------------------------------------------------------
 # Global Lists
 #------------------------------------------------------
+
 tasks = []
 completed_tasks = []
 deleted_tasks = []
@@ -186,6 +195,7 @@ def add_task():
 
     # Adds task entered to tasks list.
     tasks.append(task)
+    save_tasks()
     print("Task added successfully.")
 
 
@@ -212,6 +222,7 @@ def mark_complete():
             tasks[task_index]["complete"] = True
             completed_tasks.append(tasks_completed)
             tasks.pop(task_index)
+            save_tasks()
             print("Task marked complete.")
         else:
             print("Action cancelled.")
@@ -245,6 +256,7 @@ def delete_tasks():
             task_deleted = tasks[task_index]
             deleted_tasks.append(task_deleted)
             tasks.pop(task_index)
+            save_tasks()
             print("Task successfully deleted.")
         else:
             print("Action cancelled.")
@@ -285,10 +297,12 @@ def edit_task():
                     return
                 else:
                     selected_task["name"] = new_name
+                    save_tasks()
 
             elif menu_option == "2": #Ask user for new task description, overrides old description.
                 new_description = input("Enter new task description: ")
                 selected_task["description"] = new_description
+                save_tasks()
 
             elif menu_option == "3": #Ask user for new due date, overrides old due date.
                 new_due_date = input("Enter new task due date: ")
@@ -302,6 +316,7 @@ def edit_task():
                     return
                 else:
                     selected_task["due date"] = new_due_date
+                    save_tasks()
 
             elif menu_option == "4": #Ask user for new priority rating, overrides old priority.
                 new_priority = input("Enter new task priority: ")
@@ -314,6 +329,7 @@ def edit_task():
                     print("Priority must be one of 'High', 'Medium' or 'Low'.")
                     return
                 selected_task["priority"] = new_priority
+                save_tasks()
 
             elif menu_option == "5": #Brings user back to main menu.
                 return
@@ -342,6 +358,7 @@ def sort_tasks():
             else:
                 #If tasks list is not empty, sort tasks list by the dictionary "name" value.
                 tasks.sort(key=lambda x: x["name"])
+                save_tasks()
                 print("\nTasks sorted successfully!")
                 view_active_tasks()
 
@@ -355,6 +372,7 @@ def sort_tasks():
             else:
                 #If tasks list list is not empty. Sort by names in reverse order.
                 tasks.sort(key=lambda x: x["name"], reverse=True)
+                save_tasks()
                 print("\nTasks sorted successfully!")
                 view_active_tasks()
 
@@ -367,6 +385,7 @@ def sort_tasks():
             else:
                 #Sorts by due date if tasks list is not empty
                 tasks.sort(key=lambda x: x["due date"])
+                save_tasks()
                 print("\nTasks sorted successfully!")
                 view_active_tasks()
 
@@ -381,6 +400,7 @@ def sort_tasks():
             else:
                 #sorts by priority
                 tasks.sort(key=lambda x: priority_rank[x["priority"]])
+                save_tasks()
                 print("\nTasks sorted successfully!")
                 view_active_tasks()
 
@@ -401,6 +421,80 @@ def more_details():
     print("Users can gather more information by choosing this More Details option.")
     input("Press Enter to return to the main menu.")
     return
+
+#------------------------------------------------------
+# Save/Load Function
+#------------------------------------------------------
+
+def save_tasks():
+    save_data = {
+        "tasks": tasks,
+        "completed": completed_tasks,
+        "deleted": deleted_tasks,
+    }
+    with open("tasks.json", "w") as tasks_file:
+        json.dump(save_data, tasks_file)
+        send_data_to_storage_service()
+
+
+def load_tasks():
+    global tasks, completed_tasks, deleted_tasks
+
+    microservice_data = receive_data_from_storage_service()
+
+    if microservice_data and "data" in microservice_data:
+        storage_data = microservice_data["data"]
+
+        tasks = storage_data["tasks"]
+        completed_tasks = storage_data["completed"]
+        deleted_tasks = storage_data["deleted"]
+    else:
+        with open("tasks.json", "r") as tasks_file:
+            save_data = json.load(tasks_file)
+
+            tasks = save_data["tasks"]
+            completed_tasks = save_data["completed"]
+            deleted_tasks = save_data["deleted"]
+
+def send_data_to_storage_service():
+    send_url = "http://127.0.0.1:5000/send_user_data"
+
+    payload = {
+        "key": "Najhae",
+        "data": {
+            "tasks": tasks,
+            "completed": completed_tasks,
+            "deleted": deleted_tasks
+        }
+    }
+    response = requests.post(send_url, json=payload)
+
+    if response.status_code == 200:
+        print("Data sent to storage service.")
+    else:
+        print("Storage service error:", response.json())
+
+
+def receive_data_from_storage_service():
+    get_url = "http://127.0.0.1:5000/get_user_data"
+
+    payload = {
+        "key": "Najhae"
+    }
+    try:
+        response = requests.post(get_url, json=payload)
+
+        if response.status_code == 200:
+            print("Data received from storage service.")
+            return response.json()
+        else:
+            print("Storage service unavailable. Loading from local JSON.")
+            return None
+
+    except requests.exceptions.RequestException:
+        print("Storage service unavailable. Loading from local JSON.")
+        return None
+
 #------------------------------------------------------
 # Menu Controller Functions
 #------------------------------------------------------
@@ -432,6 +526,7 @@ def view_tasks_menu():
 #------------------------------------------------------
 # Main Program Loop
 #------------------------------------------------------
+load_tasks()
 
 def main():
     while True:
